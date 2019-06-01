@@ -4,6 +4,7 @@
 
 #include <cassert>
 #include <cstddef>
+#include <ostream>
 #include <type_traits>
 #include <utility>
 
@@ -17,7 +18,7 @@ struct Point {
         : x{}, y{}
     { }
 
-    explicit Point(T x, T y)
+    Point(T x, T y)
         : x(std::move(x)), y(std::move(y))
     { }
 
@@ -92,18 +93,22 @@ struct Point {
 // arithmetic operators
 
 template <class L, class R>
-Point<std::common_type_t<L, R>> operator+(
-    const Point<L>& lhs, const Vector<R>& rhs)
+auto operator+(const Point<L>& lhs, const Vector<R>& rhs)
 {
-    return {lhs.x + rhs.x, lhs.y + rhs.y};
+    return Point<std::common_type_t<L, R>>{lhs.x + rhs.x, lhs.y + rhs.y};
 }
 
 template <class L, class R>
-Point<std::common_type_t<L, R>> operator-(
-    const Point<L>& lhs, const Vector<R>& rhs)
+auto operator-(const Point<L>& lhs, const Vector<R>& rhs)
 {
-    return {lhs.x - rhs.x, lhs.y - rhs.y};
+    return Point<std::common_type_t<L, R>>{lhs.x - rhs.x, lhs.y - rhs.y};
 };
+
+template <class L, class R>
+auto operator-(const Point<L>& lhs, const Point<R>& rhs)
+{
+    return Vector<std::common_type_t<L, R>>{lhs.x - rhs.x, lhs.y - rhs.y};
+}
 
 // relational operators
 
@@ -141,6 +146,14 @@ template <class T>
 bool operator>(const Point<T>& lhs, const Point<T>& rhs)
 {
     return rhs < lhs;
+}
+
+// stream output
+
+template <class T>
+std::ostream& operator<<(std::ostream& output, const Point<T>& point)
+{
+    return output << point.x << ", " << point.y;
 }
 
 } // namespace ecosnail::flat

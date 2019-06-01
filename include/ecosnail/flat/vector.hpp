@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cassert>
+#include <cmath>
 #include <cstddef>
 #include <functional>
 #include <tuple>
@@ -17,7 +18,7 @@ struct Vector {
         : x{}, y{}
     { }
 
-    explicit Vector(T x, T y)
+    Vector(T x, T y)
         : x(std::move(x)), y(std::move(y))
     { }
 
@@ -108,24 +109,22 @@ struct Vector {
 // arithmetic operators
 
 template <class L, class R>
-Vector<std::common_type_t<L, R>> operator+(
-    const Vector<L>& lhs, const Vector<R>& rhs)
+auto operator+(const Vector<L>& lhs, const Vector<R>& rhs)
 {
-    return {lhs.x + rhs.x, lhs.y + rhs.y};
+    return Vector<std::common_type_t<L, R>>{lhs.x + rhs.x, lhs.y + rhs.y};
 }
 
 template <class L, class R>
-Vector<std::common_type_t<L, R>> operator-(
-    const Vector<L>& lhs, const Vector<R>& rhs)
+auto operator-(const Vector<L>& lhs, const Vector<R>& rhs)
 {
-    return {lhs.x - rhs.x, lhs.y - rhs.y};
+    return Vector<std::common_type_t<L, R>>{lhs.x - rhs.x, lhs.y - rhs.y};
 };
 
 template <class T, class U>
-Vector<std::common_type_t<T, U>> operator*(
-    const Vector<T>& vector, const U& scalar)
+auto operator*(const Vector<T>& vector, const U& scalar)
 {
-    return {vector.x * scalar, vector.y * scalar};
+    return Vector<std::common_type_t<T, U>>{
+        vector.x * scalar, vector.y * scalar};
 }
 
 template <class T, class U>
@@ -136,10 +135,10 @@ Vector<std::common_type_t<T, U>> operator*(
 }
 
 template <class T, class U>
-Vector<std::common_type_t<T, U>> operator/(
-    const Vector<T>& vector, const U& scalar)
+auto operator/(const Vector<T>& vector, const U& scalar)
 {
-    return {vector.x / scalar, vector.y / scalar};
+    return Vector<std::common_type_t<T, U>>{
+        vector.x / scalar, vector.y / scalar};
 }
 
 // relational operators
@@ -178,6 +177,33 @@ template <class T>
 bool operator>(const Vector<T>& lhs, const Vector<T>& rhs)
 {
     return rhs < lhs;
+}
+
+// geometry functions
+
+template <class T>
+T length(const Vector<T>& v)
+{
+    return std::sqrt(v.x * v.x + v.y * v.y);
+}
+
+template <class T>
+Vector<T> normalized(const Vector<T>& v)
+{
+    auto l = length(v);
+    if (l == 0) {
+        return {};
+    } else {
+        return v / l;
+    }
+}
+
+// stream output
+
+template <class T>
+std::ostream& operator<<(std::ostream& output, const Vector<T>& vector)
+{
+    return output << vector.x << ", " << vector.y;
 }
 
 } // namespace ecosnail::flat
